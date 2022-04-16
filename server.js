@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const headers = require('./headers')
 const handleErr = require('./handleErr')
+const handleSuccess = require('./handleSuccess')
 const Todolist = require('./models/todolist')
 
 dotenv.config({path: './config.env'})
@@ -23,12 +24,7 @@ const requestLister = async (req, res) => {
     })
     if(req.url === '/todos' && req.method === 'GET') {
         const todos = await Todolist.find()
-        res.writeHead(200, headers)
-        res.write(JSON.stringify({
-            status: 'success',
-            todos
-        }))
-        res.end()
+        handleSuccess(res, todos)
     } else if (req.url === '/todos' && req.method === 'POST') {
         req.on('end', async () => {
             try {
@@ -39,36 +35,21 @@ const requestLister = async (req, res) => {
                     }
                 )
                 const todos = await Todolist.find()
-                res.writeHead(200, headers)
-                res.write(JSON.stringify({
-                    status: 'success',
-                    todos
-                }))
-                res.end()
+                handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
             }
         })
     } else if(req.url === '/todos' && req.method === 'DELETE') {
         await Todolist.deleteMany({})
-        res.writeHead(200, headers)
-        res.write(JSON.stringify({
-            status: 'success',
-            todos: []
-        }))
-        res.end()
+        handleSuccess(res, [])
     } else if (req.url.startsWith('/todos') && req.method === 'DELETE') {
         req.on('end', async () => {
             try {
                 const id = req.url.split('/').pop()
                 await Todolist.findByIdAndDelete(id)
                 const todos = await Todolist.find()
-                res.writeHead(200, headers)
-                res.write(JSON.stringify({
-                    status: 'success',
-                    todos
-                }))
-                res.end()
+                handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
             }
@@ -80,12 +61,7 @@ const requestLister = async (req, res) => {
                 const id = req.url.split('/').pop()
                 await Todolist.findByIdAndUpdate(id, data)
                 const todos = await Todolist.find()
-                res.writeHead(200, headers)
-                res.write(JSON.stringify({
-                    status: 'success',
-                    todos
-                }))
-                res.end()
+                handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
             }
