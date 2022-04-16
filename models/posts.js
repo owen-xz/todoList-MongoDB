@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const todoSchema = new mongoose.Schema(
+const posts = new mongoose.Schema(
     {
         title: {
             type: String,
@@ -16,6 +16,6 @@ const todoSchema = new mongoose.Schema(
         versionKey: false
     }
 )
-const Todolist = mongoose.model('Todolist', todoSchema)
+const Posts = mongoose.model('Posts', posts)
 
-module.exports = Todolist
+module.exports = Posts

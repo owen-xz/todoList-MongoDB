@@ -4,7 +4,7 @@ const dotenv = require('dotenv')
 const headers = require('./headers')
 const handleErr = require('./handleErr')
 const handleSuccess = require('./handleSuccess')
-const Todolist = require('./models/todolist')
+const Posts = require('./models/posts')
 
 dotenv.config({path: './config.env'})
 
@@ -23,32 +23,32 @@ const requestLister = async (req, res) => {
         body += chunk
     })
     if(req.url === '/todos' && req.method === 'GET') {
-        const todos = await Todolist.find()
+        const todos = await Posts.find()
         handleSuccess(res, todos)
     } else if (req.url === '/todos' && req.method === 'POST') {
         req.on('end', async () => {
             try {
                 const data = JSON.parse(body)
-                await Todolist.create(
+                await Posts.create(
                     {
                         title: data.title
                     }
                 )
-                const todos = await Todolist.find()
+                const todos = await Posts.find()
                 handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
             }
         })
     } else if(req.url === '/todos' && req.method === 'DELETE') {
-        await Todolist.deleteMany({})
+        await Posts.deleteMany({})
         handleSuccess(res, [])
     } else if (req.url.startsWith('/todos') && req.method === 'DELETE') {
         req.on('end', async () => {
             try {
                 const id = req.url.split('/').pop()
-                await Todolist.findByIdAndDelete(id)
-                const todos = await Todolist.find()
+                await Posts.findByIdAndDelete(id)
+                const todos = await Posts.find()
                 handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
@@ -59,8 +59,8 @@ const requestLister = async (req, res) => {
             try {
                 const data = JSON.parse(body)
                 const id = req.url.split('/').pop()
-                await Todolist.findByIdAndUpdate(id, data)
-                const todos = await Todolist.find()
+                await Posts.findByIdAndUpdate(id, data)
+                const todos = await Posts.find()
                 handleSuccess(res, todos)
             } catch (err) {
                 handleErr(res)
