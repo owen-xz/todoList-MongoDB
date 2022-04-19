@@ -22,28 +22,32 @@ const requestLister = async (req, res) => {
     req.on('data', chunk => {
         body += chunk
     })
-    if(req.url === '/todos' && req.method === 'GET') {
+    if(req.url === '/posts' && req.method === 'GET') {
         const todos = await Posts.find()
         handleSuccess(res, todos)
-    } else if (req.url === '/todos' && req.method === 'POST') {
+    } else if (req.url === '/posts' && req.method === 'POST') {
         req.on('end', async () => {
             try {
                 const data = JSON.parse(body)
-                await Posts.create(
-                    {
-                        title: data.title
-                    }
-                )
-                const todos = await Posts.find()
-                handleSuccess(res, todos)
+                if(data.title) {
+                    await Posts.create(
+                        {
+                            title: data.title
+                        }
+                    )
+                    const todos = await Posts.find()
+                    handleSuccess(res, todos)
+                } else {
+                    handleErr(res)
+                }
             } catch (err) {
                 handleErr(res)
             }
         })
-    } else if(req.url === '/todos' && req.method === 'DELETE') {
+    } else if(req.url === '/posts' && req.method === 'DELETE') {
         await Posts.deleteMany({})
         handleSuccess(res, [])
-    } else if (req.url.startsWith('/todos') && req.method === 'DELETE') {
+    } else if (req.url.startsWith('/posts') && req.method === 'DELETE') {
         req.on('end', async () => {
             try {
                 const id = req.url.split('/').pop()
@@ -54,14 +58,18 @@ const requestLister = async (req, res) => {
                 handleErr(res)
             }
         })
-    } else if (req.url.startsWith('/todos') && req.method === 'PATCH') {
+    } else if (req.url.startsWith('/posts') && req.method === 'PATCH') {
         req.on('end', async () => {
             try {
                 const data = JSON.parse(body)
                 const id = req.url.split('/').pop()
-                await Posts.findByIdAndUpdate(id, data)
-                const todos = await Posts.find()
-                handleSuccess(res, todos)
+                if(data.title) {
+                    await Posts.findByIdAndUpdate(id, data)
+                    const todos = await Posts.find()
+                    handleSuccess(res, todos)
+                } else {
+                    handleErr(res)
+                }
             } catch (err) {
                 handleErr(res)
             }
@@ -75,6 +83,7 @@ const requestLister = async (req, res) => {
             status: 'false',
             message: '404 not found'
         }))
+        res.end()
     }
 }
 const server = http.createServer(requestLister)
